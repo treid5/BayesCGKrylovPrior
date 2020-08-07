@@ -1,0 +1,11 @@
+*.tex
+*~
+*.txt
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.thm
+__pycache__*
+*.html
