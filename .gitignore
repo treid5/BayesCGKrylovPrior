@@ -9,3 +9,5 @@
 *.thm
 __pycache__*
 *.html
+*.ipynb_checkpoints*
+*.DS_Store
