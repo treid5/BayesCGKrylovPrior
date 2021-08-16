@@ -6,10 +6,6 @@
 
 ### arXiv Link: [https://arxiv.org/abs/2008.03225](https://arxiv.org/abs/2008.03225)
 
-#### KNSupp.pdf
-- **Type:** Supplementary document
-- **Contents:** The supplementary document contains additional numerical experiments.
-
 #### BayesCGExperiments
 - **Type:** Directory of Python codes
 - **Contents:** Python codes, Jupyter notebooks, and matrices used to generate
