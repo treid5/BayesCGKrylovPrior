@@ -1,8 +1,10 @@
 ## Index of Supplementary Materials
 
-### Title of paper: *A Probabilistic Numerical Extension of the Conjugate Gradient Method*
+### Title of paper: *BayesCG As An Uncertainty Aware Version of CG*
 
 ### Authors: *Tim W. Reid, Ilse C. F. Ipsen, Jon Cockayne, and Chris J. Oates*
+
+### arXiv Link: [https://arxiv.org/abs/2008.03225](https://arxiv.org/abs/2008.03225)
 
 #### KNSupp.pdf
 - **Type:** Supplementary document
