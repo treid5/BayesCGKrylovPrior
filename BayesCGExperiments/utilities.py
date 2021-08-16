@@ -32,6 +32,8 @@ def random_matrix_generator(N,k = None,dist = 1,diag = False):
         Square root of A
     InvA : numpy array
         Inverse of A
+    InvSqrtA : numpy array
+        Inverse square root of A
     MinS : float
         Smallest eigenvalue of A
     MaxS : float
@@ -55,45 +57,43 @@ def random_matrix_generator(N,k = None,dist = 1,diag = False):
     # Creating the matrix
     #
 
+    SVD = {'S' : np.zeros(N)}
+
     if not diag:
         A = np.random.rand(N,N)
-        U,_ = linalg.qr(A)
+        SVD['U'],_ = linalg.qr(A)
 
-    S = np.zeros(N)
+    
 
     if dist == 1:
         # Eigenvalue distribution that causes round off errors
         rho = 0.9
         for i in range(0,N):
-            S[i] = 0.1 + ((i+1)-1)/(N-1)*(10**(k-1)-0.1)*(rho**(N-(i+1)))
+            SVD['S'][i] = 0.1+((i+1)-1)/(N-1)*(10**(k-1)-0.1)*(rho**(N-(i+1)))
     elif dist == 2:
         # Geometric eigenvalue distribution
         for i in range(N):
-            S[i] = (10**k)**((i)/(N-1)) # i-1+1 because of zero index
+            SVD['S'][i] = (10**k)**((i)/(N-1)) # i-1+1 because of zero index
     else:
         # Random eigenvalue distribution
-        S = np.sort(np.random.rand(N))[::-1]
-        CondA = max(S)/min(S)
+        SVD['S'] = np.sort(np.random.rand(N))[::-1]
+        CondA = max(SVD['S'])/min(SVD['S'])
         ShiftRatio = 10**k/CondA
         for i in range(N-2,-1,-1):
-            S[i] = S[N-1]+ShiftRatio*(S[i]-S[N-1])
+            SVD['S'][i] = SVD['S'][N-1]+ShiftRatio*(SVD['S'][i]-SVD['S'][N-1])
 
     # Multiply by random orthogonal matrix if not wanting diagonal
     if not diag:
-        A = np.diag(S)
-        SqrtA = np.diag(np.sqrt(S))
-        InvA = np.diag(S**(-1))
+        A = SVD['U']@np.diag(SVD['S'])@SVD['U'].T
     else:
-        A = S
-        SqrtA = np.sqrt(S)
-        InvA = S**(-1)
-    
+        A = SVD['S']
     
     #
     # Returning the values
     #
     
-    return A, SqrtA, InvA, min(S), max(S)
+    return A, SVD
+
 
 def mv_normal(Mean,SqrtCov):
     '''Samples from a multivariable normal distribution

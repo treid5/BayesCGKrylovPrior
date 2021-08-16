@@ -55,6 +55,9 @@ def cgqs(A, b, x, mu = None, tol = 1e-6, max_it = None,\
             'res' : Residual history
             'sExp' : Expected value of S statistic at each iteration
             'sSD' : Standard deviation of S statistic at each iteration
+            'GRApprox' : Gauss Radau approximation from [2]
+        Dictionary keys returned if mu is supplied:
+            'GaussRadau' : Gauss Radau bound computed with CGQ [1]
         Additional keys if xTrue is supplied
             'err' : Error history
             'actual_res' : Actual residual, b-Ax, history 
@@ -106,21 +109,23 @@ def cgqs(A, b, x, mu = None, tol = 1e-6, max_it = None,\
     
     # Gauss-Radau values
     g = np.zeros(max_it+1)
-    Emu = np.zeros(max_it+1)
+
     if mu is not None:
         # CGQ
+        Emu = np.zeros(max_it+1)
         gmu = np.zeros(max_it+1)
         gmu[0] = rIP[0]/mu
-    else:
-        # G-R approximation by estimating Ritz value
-        rho = gamma[0]
-        tau = gamma[0]
-        sigma = 0
-        t = 0
-        c = 0
-        phi = np.zeros(max_it+1)
-        phi[0] = 1
-        Emu[0] = gamma[0]*rIP[0]
+
+    # G-R approximation by estimating Ritz value
+    Emu_approx = np.zeros(max_it+1)
+    rho = gamma[0]
+    tau = gamma[0]
+    sigma = 0
+    t = 0
+    c = 0
+    phi = np.zeros(max_it+1)
+    phi[0] = 1
+    Emu[0] = gamma[0]*rIP[0]
         
     # S Stat Values
     SExp = np.zeros(max_it+1)
@@ -195,17 +200,17 @@ def cgqs(A, b, x, mu = None, tol = 1e-6, max_it = None,\
             # CGQ
             Deltamu = gmu[i]-g[i]
             gmu[i+1] = rIP[i+1]*(Deltamu/(mu*Deltamu+rIP[i+1]))
-        else:
-            # Ritz Value Estimate Variables
-            sigma = -1.0*np.sqrt(gamma[i+1]*delta\
-                                    /gamma[i])*(t*sigma+c*tau)
-            tau = gamma[i+1]*(delta*tau/gamma[i]+1)
-            chi = np.sqrt((rho-tau)**2+4*sigma**2)
-            c2 = 0.5*(1-(rho-tau)/chi)
-            rho = rho + chi*c2
-            t = np.sqrt(1-c2)
-            c = np.sqrt(np.abs(c))*np.sign(sigma)
-            phi[i+1] = phi[i]/(phi[i]+delta)    # phi is Ritz value
+
+        # Ritz Value Estimate Variables
+        sigma = -1.0*np.sqrt(gamma[i+1]*delta\
+                             /gamma[i])*(t*sigma+c*tau)
+        tau = gamma[i+1]*(delta*tau/gamma[i]+1)
+        chi = np.sqrt((rho-tau)**2+4*sigma**2)
+        c2 = 0.5*(1-(rho-tau)/chi)
+        rho = rho + chi*c2
+        t = np.sqrt(1-c2)
+        c = np.sqrt(np.abs(c))*np.sign(sigma)
+        phi[i+1] = phi[i]/(phi[i]+delta)    # phi is Ritz value
             
         
         #  1 based indexing for Error Estimates
@@ -220,9 +225,9 @@ def cgqs(A, b, x, mu = None, tol = 1e-6, max_it = None,\
             if mu is not None:
                 # CGQ
                 Emu[ila] = SExp[ila]+gmu[i]
-            else:
-                # Gauss-Radau approximation
-                Emu[ila] = phi[ila]*rho*rIP[ila]
+
+            # Gauss-Radau approximation
+            Emu_approx[ila] = phi[ila]*rho*rIP[ila]
 
         # Evaluate convergence condition
         if tol is not None and i >= delay:
@@ -236,7 +241,10 @@ def cgqs(A, b, x, mu = None, tol = 1e-6, max_it = None,\
     info = {'res':res[:ila+1]}
     info['sExp'] = SExp[:ila+1]
     info['sSD'] = SSD[:ila+1]
-    info['GaussRadau'] = Emu[:ila+1]
+    info['GRApprox'] = Emu_approx[:ila+1]
+
+    if mu is not None:
+        info['GaussRadau'] = Emu[:ila+1]
 
     if xTrue is not None:
         info['err'] = err_hist[:ila+1]

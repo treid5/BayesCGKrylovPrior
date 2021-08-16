@@ -43,7 +43,7 @@ def bayescg(A, b, x, Sig, max_it=None, tol=1e-6, \
     -------
     x : numpy array
         Posterior mean
-    SigAs : (m by n) numpy array 
+    SigAs : (n by m) numpy array 
         Vectors Sigma_0As_i, 1<=i<=m, to compute posterior covariance
     info : dict
         Dictionary containing convergence information
@@ -51,7 +51,8 @@ def bayescg(A, b, x, Sig, max_it=None, tol=1e-6, \
             'res' : Residual history
             'search_dir' : Search directions used to compute posterior
         Additional keys if xTrue is supplied
-            'err' : Error history
+            'err' : A-Norm Error history [ || x_* - x_m || ]
+            'trace' : Trace history [ trace(A Sigma_m) ]
             'actual_res' : Actual residual, b-Ax, history 
                 (as opposed to recursively computed residual)
 
@@ -103,6 +104,8 @@ def bayescg(A, b, x, Sig, max_it=None, tol=1e-6, \
             Res = rNorm/xNormANorm
             Res2[0] = Res
         Res3 = np.copy(Res2)
+        tr_hist = np.zeros(max_it+1)
+        tr_hist[0] = np.trace(A(Sig(np.eye(N))))
     
     i = 0
     
@@ -141,6 +144,8 @@ def bayescg(A, b, x, Sig, max_it=None, tol=1e-6, \
         rNorm = np.sqrt(rIP[i+1])
         if xTrue is not None:
             err_hist[i+1] = np.inner(x-xTrue,A(x-xTrue))
+            tr_hist[i+1] = tr_hist[i] - np.trace(A(np.outer( \
+                SigAs[:,i],SigAs[:,i])))/sIP[i]
             rTrueNorm = linalg.norm(b-A(x))
             if NormA is not None:
                 Res = rNorm/xNormANorm
@@ -169,6 +174,7 @@ def bayescg(A, b, x, Sig, max_it=None, tol=1e-6, \
     if xTrue is not None:
         info['actual_res'] = Res3[:i+1]
         info['err'] = err_hist[:i+1]
+        info['trace'] = tr_hist[:i+1]
     
     return x, (sIP[:i]**(-1/2))*SigAs[:,:i], info
 
