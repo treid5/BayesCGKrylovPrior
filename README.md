@@ -16,8 +16,6 @@ Both papers share implementations of some algorithms, but each paper has their o
 
 ### Jupyter notebook: [Statistical-Properties-BayesCG.ipynb](Statistical-Properties-BayesCG.ipynb)
 
-### arXiv Link: [https://arxiv.org/abs/2008.03225](https://arxiv.org/abs/2008.03225)
-
 ## List of files:
 
 ### Algorithms:
